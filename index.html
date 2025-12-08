@@ -4,111 +4,327 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Entrée Mariage Dorcas & Jefté</title>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="./html5-qrcode.min.js" type="text/javascript"></script>
+
   <style>
+    :root {
+      --color-text: #ffffff;
+      --color-bg-overlay: rgba(0, 0, 0, 0.45);
+      --color-valid: #00ff9c;
+      --color-invalid: #ff4d4d;
+      --color-accent: #b76e79;
+    }
+    [data-theme="day"] {
+      --color-text: #111;
+      --color-bg-overlay: rgba(255, 255, 255, 0.4);
+    }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f4f8;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('./DSC02860 2.jpg') center/cover no-repeat fixed;
+      color: var(--color-text);
       text-align: center;
-      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: var(--color-bg-overlay);
+      z-index: 0;
+    }
+    h1 {
+      z-index: 1;
+      font-size: 2em;
+      letter-spacing: 1px;
+      color: var(--color-accent);
+      text-shadow: 0 0 15px rgba(183,110,121,0.6);
     }
     .scanner {
-      margin: 0 auto;
-      width: 300px;
+      z-index: 1;
+      width: 320px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      border: 2px solid var(--color-accent);
+      border-radius: 16px;
+      padding: 10px;
+      margin-top: 20px;
     }
     .status {
+      z-index: 1;
       margin-top: 20px;
-      font-size: 1.2em;
+      font-size: 1.3em;
+      font-weight: 600;
     }
-    .ok { color: green; }
-    .invalid, .already { color: red; }
-    .scanned-list {
-      max-height: 200px;
-      overflow-y: auto;
-      margin-top: 30px;
-      background: #fff;
-      padding: 10px;
+    .ok { color: var(--color-valid); }
+    .invalid, .already { color: var(--color-invalid); }
+    button {
+      z-index: 1;
+      margin-top: 15px;
+      background: var(--color-accent);
+      color: white;
+      border: none;
+      padding: 10px 18px;
       border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+    .scanned-list {
+      z-index: 1;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 25px;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(6px);
+      padding: 15px;
+      border-radius: 10px;
+      width: 350px;
+    }
+    .scanned-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .scanned-list li input {
+      margin-left: 10px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background: rgba(255,255,255,0.8);
+      color: black;
+      flex: 1;
     }
   </style>
 </head>
+
 <body>
-  <h1>Entrée Mariage Dorcas & Jefté</h1>
+  <div class="overlay"></div>
+
+  <h1>SCANNE LES PASS AU MARIAGE DE RÊVE<br>DORCAS & JEFTÉ 💍</h1>
+
   <div id="reader" class="scanner"></div>
 
   <div class="status" id="status"></div>
   <div id="info"></div>
+
+  <p id="count">Invités scannés : 0</p>
+
   <button onclick="resetScan()">Scanner un autre QR</button>
+  <button onclick="exportScannedList()">Exporter la liste</button>
+
+  <!-- 🔍 BARRE DE RECHERCHE -->
+  <input 
+    type="text" 
+    id="searchInput" 
+    placeholder="Rechercher un nom..." 
+    oninput="searchName()" 
+    style="margin-top: 15px; padding: 10px; width: 300px; border-radius: 8px; border: 1px solid #ccc;">
+  <ul id="searchResults" style="list-style:none; padding:0; margin-top:10px; width:300px;"></ul>
 
   <div class="scanned-list">
     <h3>Invités scannés :</h3>
     <ul id="scannedList"></ul>
   </div>
 
-  <script>
-    const invitesAutorises = [
-      { nom: "Naomi", personnes: 1, table: 3 },
-      { nom: "Couple Maro", personnes: 2, table: 3 },
-      { nom: "Couple Jésuane", personnes: 2, table: 3 },
-      { nom: "Dicap's", personnes: 2, table: 3 },
-      { nom: "Ritchy", personnes: 1, table: 3 },
-      { nom: "Ivana", personnes: 1, table: 3 }
-    ];
+  <!-- Sons -->
+  <audio id="sound-valid" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_bdb3c98d8d.mp3?filename=correct-2-46134.mp3"></audio>
+  <audio id="sound-error" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_28298b3dbf.mp3?filename=error-2-126514.mp3"></audio>
 
-    const normalize = (str) => str.trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+<script>
+/* 🌙 Mode automatique jour/nuit */
+const hour = new Date().getHours();
+document.body.setAttribute("data-theme", (hour >= 7 && hour < 19) ? "day" : "night");
 
-    const scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
-    scanned.forEach(s => addToList(s));
+/* 🧾 Liste des invités autorisés */
+const invitesAutorises = [
+  { nom: "Naomi", personnes: 1, table: 3 },
+  { nom: "Couple Maro", personnes: 2, table: 3 },
+  { nom: "Couple Jésuane", personnes: 2, table: 3 },
+  { nom: "Dicap's", personnes: 2, table: 3 },
+  { nom: "Ritchy", personnes: 1, table: 3 },
+  { nom: "Ivana", personnes: 1, table: 3 }
+];
 
-    function resetScan() {
-      document.getElementById("status").innerText = "";
-      document.getElementById("info").innerText = "";
+const normalize = (str) => str.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
+const scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
+scanned.forEach(s => addToList(s));
+updateCount();
+
+let lastScanned = "";
+let lastScanTime = 0;
+
+/* 🔄 Reset scan */
+function resetScan() {
+  document.getElementById("status").innerText = "";
+  document.getElementById("info").innerText = "";
+}
+
+/* 🧮 compteur */
+function updateCount() {
+  document.getElementById("count").innerText = `Invités scannés : ${scanned.length}`;
+}
+
+/* 📝 Ajouter liste scannée */
+function addToList(invite) {
+  const ul = document.getElementById("scannedList");
+  const li = document.createElement("li");
+
+  const infoSpan = document.createElement("span");
+  infoSpan.textContent = `✅ ${invite.nom} - ${invite.personnes} pers. - Table ${invite.table}`;
+
+  const commentInput = document.createElement("input");
+  commentInput.placeholder = "Commentaires...";
+  commentInput.value = invite.comment || "";
+  commentInput.addEventListener("input", () => {
+    invite.comment = commentInput.value;
+    localStorage.setItem("scannedList", JSON.stringify(scanned));
+  });
+
+  li.appendChild(infoSpan);
+  li.appendChild(commentInput);
+  ul.appendChild(li);
+}
+
+/* 📡 Gestion scan */
+function handleScan(decodedText) {
+  const now = Date.now();
+  if (decodedText === lastScanned && now - lastScanTime < 3000) return;
+  lastScanned = decodedText;
+  lastScanTime = now;
+
+  const successSound = document.getElementById("sound-valid");
+  const errorSound = document.getElementById("sound-error");
+  const status = document.getElementById("status");
+  const info = document.getElementById("info");
+
+  try {
+    const data = JSON.parse(decodedText);
+    const nomNorm = normalize(data.nom);
+    const already = scanned.find(s => normalize(s.nom) === nomNorm);
+    const valid = invitesAutorises.find(i =>
+      normalize(i.nom) === nomNorm &&
+      i.personnes == data.personnes &&
+      i.table == data.table
+    );
+
+    if (already) {
+      status.innerText = `✅ ${already.nom} est déjà entré`;
+      status.className = "ok";
+      successSound.play();
+      info.innerHTML = `<p><strong>Nom :</strong> ${already.nom}</p>
+                        <p><strong>Personnes :</strong> ${already.personnes}</p>
+                        <p><strong>Table :</strong> ${already.table}</p>`;
+      return;
     }
 
-    function addToList(invite) {
-      const ul = document.getElementById("scannedList");
-      const li = document.createElement("li");
-      li.textContent = `✅ ${invite.nom} - ${invite.personnes} pers. - Table ${invite.table}`;
-      ul.appendChild(li);
+    if (valid) {
+      status.innerText = "✅ Invitation valide !";
+      status.className = "ok";
+      successSound.play();
+
+      data.comment = "";
+      scanned.push(data);
+      localStorage.setItem("scannedList", JSON.stringify(scanned));
+
+      info.innerHTML = `<p><strong>Nom :</strong> ${data.nom}</p>
+                        <p><strong>Personnes :</strong> ${data.personnes}</p>
+                        <p><strong>Table :</strong> ${data.table}</p>`;
+      addToList(data);
+      updateCount();
+    } else {
+      status.innerText = "❌ Invitation non reconnue";
+      status.className = "invalid";
+      errorSound.play();
     }
+  } catch {
+    status.innerText = "QR invalide";
+    status.className = "invalid";
+    errorSound.play();
+  }
+}
 
-    function handleScan(decodedText) {
-      try {
-        const data = JSON.parse(decodedText);
-        const nomNorm = normalize(data.nom);
-        const already = scanned.find(s => normalize(s.nom) === nomNorm);
-        const valid = invitesAutorises.find(i => normalize(i.nom) === nomNorm && i.personnes == data.personnes && i.table == data.table);
+/* 🔍 Recherche par nom */
+function searchName() {
+  const input = document.getElementById("searchInput").value.trim().toLowerCase();
+  const results = document.getElementById("searchResults");
+  results.innerHTML = "";
 
-        const status = document.getElementById("status");
-        const info = document.getElementById("info");
+  if (input.length < 2) return;
 
-        if (already) {
-          status.innerText = "Déjà scanné !";
-          status.className = "already";
-        } else if (valid) {
-          status.innerText = "Invitation valide ! Bienvenue !";
-          status.className = "ok";
-          scanned.push(data);
-          localStorage.setItem("scannedList", JSON.stringify(scanned));
-          info.innerHTML = `<p><strong>Nom :</strong> ${data.nom}</p><p><strong>Personnes :</strong> ${data.personnes}</p><p><strong>Table :</strong> ${data.table}</p>`;
-          addToList(data);
-        } else {
-          status.innerText = "Invitation non reconnue";
-          status.className = "invalid";
-        }
-      } catch (e) {
-        document.getElementById("status").innerText = "QR invalide";
-        document.getElementById("status").className = "invalid";
-      }
-    }
+  const matches = invitesAutorises.filter(invite =>
+    normalize(invite.nom).includes(normalize(input))
+  );
 
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 250 },
-      handleScan
-    ).catch(err => console.error(err));
-  </script>
+  matches.forEach(invite => {
+    const li = document.createElement("li");
+    li.style.padding = "8px";
+    li.style.background = "rgba(255,255,255,0.1)";
+    li.style.marginBottom = "5px";
+    li.style.cursor = "pointer";
+    li.style.borderRadius = "5px";
+
+    li.textContent = `${invite.nom} – ${invite.personnes} pers – Table ${invite.table}`;
+
+    li.onclick = () => {
+      displayManualInfo(invite);
+      results.innerHTML = "";
+      document.getElementById("searchInput").value = "";
+    };
+
+    results.appendChild(li);
+  });
+}
+
+/* 📋 Affichage manuel */
+function displayManualInfo(invite) {
+  const status = document.getElementById("status");
+  const info = document.getElementById("info");
+  const successSound = document.getElementById("sound-valid");
+
+  status.innerText = "📋 Invitation trouvée (recherche manuelle)";
+  status.className = "ok";
+  successSound.play();
+
+  info.innerHTML = `
+    <p><strong>Nom :</strong> ${invite.nom}</p>
+    <p><strong>Personnes :</strong> ${invite.personnes}</p>
+    <p><strong>Table :</strong> ${invite.table}</p>
+  `;
+
+  const exists = scanned.find(s => normalize(s.nom) === normalize(invite.nom));
+
+  if (!exists) {
+    scanned.push({ ...invite, comment: "" });
+    localStorage.setItem("scannedList", JSON.stringify(scanned));
+    addToList(invite);
+    updateCount();
+  }
+}
+
+/* 📤 Export CSV */
+function exportScannedList() {
+  const data = JSON.parse(localStorage.getItem("scannedList") || "[]");
+  const csv = "Nom,Personnes,Table,Commentaires\n" +
+    data.map(i => `${i.nom},${i.personnes},${i.table},${i.comment || ""}`).join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "invites_scannes.csv";
+  link.click();
+}
+</script>
+
+<script>
+  /* Initialisation du scanner */
+  const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+  scanner.render(handleScan);
+</script>
+
 </body>
 </html>
