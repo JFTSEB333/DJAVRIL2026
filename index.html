@@ -132,6 +132,23 @@
       align-items: center;
       margin-bottom: 5px;
     }
+
+    #searchInput {
+      margin-top: 20px;
+      padding: 8px;
+      width: 250px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #searchResults {
+      list-style: none;
+      padding: 0;
+      margin-top: 5px;
+      width: 250px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 <body>
@@ -148,6 +165,9 @@
 
   <button onclick="resetScan()">Scanner un autre QR</button>
   <button onclick="exportScannedList()">Exporter la liste</button>
+
+  <input type="text" id="searchInput" oninput="searchName()" placeholder="Rechercher un invité...">
+  <ul id="searchResults"></ul>
 
   <div class="scanned-list">
     <h3>Invités scannés :</h3>
@@ -237,7 +257,7 @@
           status.className = "ok";
           successSound.play();
 
-          data.comment = ""; // champ commentaire vide par défaut
+          data.comment = "";
           scanned.push(data);
           localStorage.setItem("scannedList", JSON.stringify(scanned));
 
@@ -257,61 +277,92 @@
     }
 
     function exportScannedList() {
-      const data = JSON.parse(localStorage.getItem("scannedList") || "[]");
-      const csv = "Nom,Personnes,Table,Commentaires\n" + data.map(i => `${i.nom},${i.personnes},${i.table
-                                                                                                  function searchName() {
-  const input = document.getElementById("searchInput").value.trim().toLowerCase();
-  const searchResults = document.getElementById("searchResults");
-  searchResults.innerHTML = "";
+      if(scanned.length === 0) {
+        alert("Aucun invité scanné pour exporter !");
+        return;
+      }
 
-  if (input.length < 2) return; // éviter trop de recherche
+      const csvContent = "Nom,Personnes,Table,Commentaires\n" +
+        scanned.map(i => `${i.nom},${i.personnes},${i.table},${i.comment || ""}`).join("\n");
 
-  const matches = invitesAutorises.filter(invite =>
-    normalize(invite.nom).includes(normalize(input))
-  );
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "invites_scannes.csv");
+      link.click();
+    }
 
-  matches.forEach(invite => {
-    const li = document.createElement("li");
-    li.style.padding = "8px";
-    li.style.background = "rgba(255,255,255,0.1)";
-    li.style.marginBottom = "5px";
-    li.style.cursor = "pointer";
-    li.style.borderRadius = "5px";
+    function searchName() {
+      const input = document.getElementById("searchInput").value.trim().toLowerCase();
+      const searchResults = document.getElementById("searchResults");
+      searchResults.innerHTML = "";
 
-    li.textContent = `${invite.nom} – ${invite.personnes} pers – Table ${invite.table}`;
-    
-    li.onclick = () => {
-      displayManualInfo(invite);
-      document.getElementById("searchResults").innerHTML = "";
-      document.getElementById("searchInput").value = "";
-    };
+      if (input.length < 2) return;
 
-    searchResults.appendChild(li);
-  });
-}
+      const matches = invitesAutorises.filter(invite =>
+        normalize(invite.nom).includes(normalize(input))
+      );
 
-function displayManualInfo(invite) {
-  const status = document.getElementById("status");
-  const info = document.getElementById("info");
-  const successSound = document.getElementById("sound-valid");
+      matches.forEach(invite => {
+        const li = document.createElement("li");
+        li.style.padding = "8px";
+        li.style.background = "rgba(255,255,255,0.1)";
+        li.style.marginBottom = "5px";
+        li.style.cursor = "pointer";
+        li.style.borderRadius = "5px";
 
-  status.innerText = "📋 Invitation trouvée (recherche manuelle)";
-  status.className = "ok";
-  successSound.play();
+        li.textContent = `${invite.nom} – ${invite.personnes} pers – Table ${invite.table}`;
 
-  info.innerHTML = `
-    <p><strong>Nom :</strong> ${invite.nom}</p>
-    <p><strong>Personnes :</strong> ${invite.personnes}</p>
-    <p><strong>Table :</strong> ${invite.table}</p>
-  `;
+        li.onclick = () => {
+          displayManualInfo(invite);
+          searchResults.innerHTML = "";
+          document.getElementById("searchInput").value = "";
+        };
 
-  // Ajout dans la liste scannée si pas encore passé
-  const exists = scanned.find(s => normalize(s.nom) === normalize(invite.nom));
-  
-  if (!exists) {
-    scanned.push({ ...invite, comment: "" });
-    localStorage.setItem("scannedList", JSON.stringify(scanned));
-    addToList(invite);
-    updateCount();
-  }
-}
+        searchResults.appendChild(li);
+      });
+    }
+
+    function displayManualInfo(invite) {
+      const status = document.getElementById("status");
+      const info = document.getElementById("info");
+      const successSound = document.getElementById("sound-valid");
+
+      status.innerText = "📋 Invitation trouvée (recherche manuelle)";
+      status.className = "ok";
+      successSound.play();
+
+      info.innerHTML = `
+        <p><strong>Nom :</strong> ${invite.nom}</p>
+        <p><strong>Personnes :</strong> ${invite.personnes}</p>
+        <p><strong>Table :</strong> ${invite.table}</p>
+      `;
+
+      const exists = scanned.find(s => normalize(s.nom) === normalize(invite.nom));
+
+      if (!exists) {
+        scanned.push({ ...invite, comment: "" });
+        localStorage.setItem("scannedList", JSON.stringify(scanned));
+        addToList(invite);
+        updateCount();
+      }
+    }
+
+    // Initialiser le scanner QR
+    Html5Qrcode.getCameras().then(cameras => {
+      if (cameras && cameras.length) {
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: 250 },
+          handleScan
+        );
+      } else {
+        alert("Aucune caméra trouvée");
+      }
+    }).catch(err => console.error(err));
+
+  </script>
+</body>
+</html>
