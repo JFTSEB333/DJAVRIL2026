@@ -3,203 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scanner QR - Mariage</title>
-
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
+<title>Scanner QR - Mariage (Avancé)</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
 <style>
-    body {
-        margin: 0;
-        padding: 20px;
-        background: #ffffff;
-        font-family: Arial, sans-serif;
-        text-align: center;
-    }
-
-    /* Cadre du scanner */
-    #reader {
-        width: 300px;
-        height: 300px;
-        margin: 20px auto;
-        position: relative;
-        background: transparent;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 3px solid #3cb371;
-    }
-
-    /* Encadré vert */
-    #reader::after {
-        content: "";
-        position: absolute;
-        top: 50%; left: 50%;
-        width: 180px;
-        height: 180px;
-        border: 4px solid #00ff00;
-        transform: translate(-50%, -50%);
-        border-radius: 15px;
-        pointer-events: none;
-    }
-
-    button {
-        padding: 10px 15px;
-        margin: 5px;
-        background: #3cb371;
-        border: none;
-        border-radius: 6px;
-        color: #fff;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
-    button:hover {
-        opacity: 0.85;
-    }
-
-    #scannedList {
-        margin-top: 20px;
-        text-align: left;
-        max-width: 350px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    #searchResults div {
-        background: #eee;
-        padding: 8px;
-        margin: 5px 0;
-        cursor: pointer;
-        border-radius: 5px;
-    }
+body{font-family:Arial;text-align:center;padding:20px}
+#reader{width:300px;height:300px;margin:20px auto;border:3px solid #3cb371;border-radius:10px;position:relative;overflow:hidden}
+#reader::after{content:"";position:absolute;top:50%;left:50%;width:180px;height:180px;border:4px solid #00ff00;transform:translate(-50%,-50%);border-radius:15px;pointer-events:none}
+button{padding:10px 15px;margin:5px;background:#3cb371;border:none;border-radius:6px;color:white;font-weight:bold;cursor:pointer}
+#scannedList{max-width:360px;margin:auto;text-align:left}
+.alert-ok{color:green;font-weight:bold}
+.alert-err{color:red;font-weight:bold}
 </style>
-
 </head>
 <body>
-
-<h2>Scanner QR Code - Mariage</h2>
-
+<h2>Contrôle invités – Entrée mariage</h2>
 <div id="reader"></div>
-
 <p id="status"></p>
 <p id="info"></p>
-
-<button onclick="resetScan()">Scanner à nouveau</button>
-<button onclick="exportScannedList()">Exporter</button>
+<button onclick="restartScanner()">Scanner suivant</button>
 <button onclick="resetAll()">Reset total</button>
-
-<h3>Recherche manuelle</h3>
-<input type="text" id="searchInput" placeholder="Nom..." oninput="searchName()">
-<div id="searchResults"></div>
-
-<h3>Invités scannés (<span id="count">0</span>)</h3>
+<h3>Invités entrés (<span id="count">0</span>)</h3>
+<p><b>Total personnes :</b> <span id="totalPeople">0</span></p>
 <div id="scannedList"></div>
-
 <script>
-/* --- Données invité --- */
-const invites = [
-    { nom: "Jefté Domingos", personnes: 2, table: "Table 1" },
-    { nom: "Dorcas Nkiesa", personnes: 1, table: "Table 2" }
+const invites=[
+ {nom:"Jefté Domingos",personnes:2,table:"Table 1"},
+ {nom:"Dorcas Nkiesa",personnes:1,table:"Table 2"}
 ];
-
-// Charger historique
-let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
-updateList();
-
-const html5QrCode = new Html5Qrcode("reader");
-
-/* --- Lancer caméra immédiatement --- */
-html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 200 },
-    handleScan,
-    () => {}
-).catch(err => alert("Erreur accès caméra : " + err));
-
-
-/* --- FONCTION : Quand un QR est scanné --- */
-function handleScan(text) {
-    document.getElementById("status").innerText = "QR détecté !";
-
-    let invite = invites.find(i => i.nom.toLowerCase() === text.toLowerCase());
-
-    if (!invite) {
-        document.getElementById("info").innerText = "Invité inconnu !";
-        return;
-    }
-
-    document.getElementById("info").innerHTML =
-        `<b>${invite.nom}</b><br>
-         Personnes : ${invite.personnes}<br>
-         Table : ${invite.table}`;
-
-    if (!scanned.some(i => i.nom === invite.nom)) {
-        scanned.push(invite);
-        localStorage.setItem("scannedList", JSON.stringify(scanned));
-        updateList();
-    }
-}
-
-/* --- Mettre à jour liste --- */
-function updateList() {
-    const div = document.getElementById("scannedList");
-    div.innerHTML = scanned.map(i => `<div>✔️ ${i.nom} (${i.personnes}) - ${i.table}</div>`).join("");
-    document.getElementById("count").innerText = scanned.length;
-}
-
-/* --- Bouton scanner à nouveau --- */
-function resetScan() {
-    document.getElementById("status").innerText = "";
-    document.getElementById("info").innerText = "";
-}
-
-/* --- Exporter CSV --- */
-function exportScannedList() {
-    if (scanned.length === 0) return alert("Aucun invité scanné");
-
-    const csv = "Nom,Personnes,Table\n" +
-        scanned.map(i => `${i.nom},${i.personnes},${i.table}`).join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "invites_scannes.csv";
-    link.click();
-}
-
-/* --- RESET TOTAL --- */
-function resetAll() {
-    if (!confirm("Tout effacer ?")) return;
-    scanned = [];
-    localStorage.removeItem("scannedList");
-    updateList();
-    resetScan();
-}
-
-/* --- RECHERCHE MANUELLE --- */
-function searchName() {
-    const val = document.getElementById("searchInput").value.toLowerCase();
-    const results = invites.filter(i => i.nom.toLowerCase().includes(val));
-    const div = document.getElementById("searchResults");
-
-    div.innerHTML = results.map(i => `
-        <div onclick='selectManual("${i.nom}")'>${i.nom}</div>
-    `).join("");
-}
-
-function selectManual(nom) {
-    const invite = invites.find(i => i.nom === nom);
-    document.getElementById("info").innerHTML =
-        `<b>${invite.nom}</b><br>Personnes : ${invite.personnes}<br>Table : ${invite.table}`;
-
-    if (!scanned.some(i => i.nom === nom)) {
-        scanned.push(invite);
-        localStorage.setItem("scannedList", JSON.stringify(scanned));
-        updateList();
-    }
-}
+let scanned=JSON.parse(localStorage.getItem("scannedList")||"[]");
+let scanner=new Html5Qrcode("reader");
+let scanning=false;
+updateUI();
+start();
+function start(){if(scanning)return;scanner.start({facingMode:"environment"},{fps:10,qrbox:200},onScan).then(()=>scanning=true);}
+function stop(){if(!scanning)return;scanner.stop().then(()=>scanning=false);}
+function beep(ok=true){const ctx=new AudioContext();const o=ctx.createOscillator();o.frequency.value=ok?800:200;o.connect(ctx.destination);o.start();setTimeout(()=>o.stop(),150);} 
+function onScan(text){stop();const invite=invites.find(i=>i.nom.toLowerCase()===text.toLowerCase());if(!invite){beep(false);document.getElementById("status").innerHTML='<span class="alert-err">❌ QR invalide</span>';return;}if(scanned.some(i=>i.nom===invite.nom)){beep(false);document.getElementById("status").innerHTML='<span class="alert-err">⛔ Déjà entré</span>';return;}beep(true);navigator.vibrate?.(200);scanned.push(invite);localStorage.setItem("scannedList",JSON.stringify(scanned));document.getElementById("status").innerHTML='<span class="alert-ok">✅ Accès autorisé</span>';document.getElementById("info").innerHTML=`<b>${invite.nom}</b><br>Personnes : ${invite.personnes}<br>${invite.table}`;updateUI();}
+function updateUI(){document.getElementById("scannedList").innerHTML=scanned.map(i=>`✔️ ${i.nom} (${i.personnes})`).join('<br>');document.getElementById("count").innerText=scanned.length;document.getElementById("totalPeople").innerText=scanned.reduce((t,i)=>t+i.personnes,0);} 
+function restartScanner(){document.getElementById("status").innerText='';document.getElementById("info").innerText='';start();}
+function resetAll(){if(!confirm('Tout effacer ?'))return;scanned=[];localStorage.clear();updateUI();restartScanner();}
 </script>
-
 </body>
 </html>
