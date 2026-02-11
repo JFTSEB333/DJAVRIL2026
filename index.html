@@ -14,10 +14,17 @@ body {
   text-align: center;
   padding: 20px;
 }
-.scanner { width: 300px; margin: auto; }
-.status { font-size: 1.4em; margin-top: 15px; }
+.scanner {
+  width: 300px;
+  margin: auto;
+}
+.status {
+  font-size: 1.4em;
+  margin-top: 15px;
+}
 .ok { color: green; }
 .invalid, .already { color: red; }
+
 .scanned-list {
   max-height: 220px;
   overflow-y: auto;
@@ -26,10 +33,20 @@ body {
   padding: 10px;
   border-radius: 8px;
 }
+
+input {
+  padding: 10px;
+  font-size: 1em;
+  width: 220px;
+  margin-top: 5px;
+}
 button {
-  margin: 10px;
   padding: 10px 15px;
   font-size: 1em;
+  margin: 5px;
+}
+hr {
+  margin: 25px 0;
 }
 </style>
 </head>
@@ -40,6 +57,7 @@ button {
 
 <h3 id="counter">👥 Personnes entrées : 0</h3>
 
+<!-- SCANNER QR -->
 <div id="reader" class="scanner"></div>
 
 <div id="status" class="status"></div>
@@ -48,46 +66,25 @@ button {
 <button onclick="resetScan()">Scanner un autre QR</button>
 <button onclick="resetAll()">🔒 Reset total</button>
 
+<hr>
+
+<!-- MODE MANUEL -->
+<h3>✍️ Recherche manuelle (secours)</h3>
+<input type="text" id="manualName" placeholder="Nom de l'invité">
+<br>
+<button onclick="manualCheck()">Valider manuellement</button>
+
+<!-- LISTE -->
 <div class="scanned-list">
-  <h3>Invités scannés</h3>
+  <h3>Invités entrés</h3>
   <ul id="scannedList"></ul>
 </div>
 
 <script>
+/* ================== CONFIG ================== */
 const TOKEN_SECRET = "MARIAGE2026";
 const ADMIN_CODE = "ADMIN2026";
 
+/* LISTE DES INVITÉS AUTORISÉS */
 const invitesAutorises = [
   { nom: "Naomi", personnes: 1, table: 3 },
-  { nom: "Couple Maro", personnes: 2, table: 3 },
-  { nom: "Couple Jésuane", personnes: 2, table: 3 },
-  { nom: "Dicap's", personnes: 2, table: 3 },
-  { nom: "Ritchy", personnes: 1, table: 3 },
-  { nom: "Ivana", personnes: 1, table: 3 }
-];
-
-const normalize = s =>
-  s.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
-
-let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
-
-scanned.forEach(addToList);
-updateCounter();
-
-function resetScan() {
-  document.getElementById("status").innerText = "";
-  document.getElementById("info").innerHTML = "";
-}
-
-function resetAll() {
-  const code = prompt("Code admin ?");
-  if (code === ADMIN_CODE) {
-    localStorage.removeItem("scannedList");
-    location.reload();
-  }
-}
-
-function addToList(invite) {
-  const li = document.createElement("li");
-  li.textContent = `✅ ${invite.nom} – ${invite.personnes} pers – Table ${invite.table}`;
-  document.getEl
