@@ -3,45 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scanner QR - Mariage (Avancé)</title>
+<title>Entrée Mariage Dorcas & Jefté</title>
+
 <script src="https://unpkg.com/html5-qrcode"></script>
+
 <style>
-body{font-family:Arial;text-align:center;padding:20px}
-#reader{width:300px;height:300px;margin:20px auto;border:3px solid #3cb371;border-radius:10px;position:relative;overflow:hidden}
-#reader::after{content:"";position:absolute;top:50%;left:50%;width:180px;height:180px;border:4px solid #00ff00;transform:translate(-50%,-50%);border-radius:15px;pointer-events:none}
-button{padding:10px 15px;margin:5px;background:#3cb371;border:none;border-radius:6px;color:white;font-weight:bold;cursor:pointer}
-#scannedList{max-width:360px;margin:auto;text-align:left}
-.alert-ok{color:green;font-weight:bold}
-.alert-err{color:red;font-weight:bold}
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f4f8;
+  text-align: center;
+  padding: 20px;
+}
+.scanner { width: 300px; margin: auto; }
+.status { font-size: 1.4em; margin-top: 15px; }
+.ok { color: green; }
+.invalid, .already { color: red; }
+.scanned-list {
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 25px;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+}
+button {
+  margin: 10px;
+  padding: 10px 15px;
+  font-size: 1em;
+}
 </style>
 </head>
+
 <body>
-<h2>Contrôle invités – Entrée mariage</h2>
-<div id="reader"></div>
-<p id="status"></p>
-<p id="info"></p>
-<button onclick="restartScanner()">Scanner suivant</button>
-<button onclick="resetAll()">Reset total</button>
-<h3>Invités entrés (<span id="count">0</span>)</h3>
-<p><b>Total personnes :</b> <span id="totalPeople">0</span></p>
-<div id="scannedList"></div>
+
+<h1>💍 Entrée Mariage Dorcas & Jefté</h1>
+
+<h3 id="counter">👥 Personnes entrées : 0</h3>
+
+<div id="reader" class="scanner"></div>
+
+<div id="status" class="status"></div>
+<div id="info"></div>
+
+<button onclick="resetScan()">Scanner un autre QR</button>
+<button onclick="resetAll()">🔒 Reset total</button>
+
+<div class="scanned-list">
+  <h3>Invités scannés</h3>
+  <ul id="scannedList"></ul>
+</div>
+
 <script>
-const invites=[
- {nom:"Jefté Domingos",personnes:2,table:"Table 1"},
- {nom:"Dorcas Nkiesa",personnes:1,table:"Table 2"}
+const TOKEN_SECRET = "MARIAGE2026";
+const ADMIN_CODE = "ADMIN2026";
+
+const invitesAutorises = [
+  { nom: "Naomi", personnes: 1, table: 3 },
+  { nom: "Couple Maro", personnes: 2, table: 3 },
+  { nom: "Couple Jésuane", personnes: 2, table: 3 },
+  { nom: "Dicap's", personnes: 2, table: 3 },
+  { nom: "Ritchy", personnes: 1, table: 3 },
+  { nom: "Ivana", personnes: 1, table: 3 }
 ];
-let scanned=JSON.parse(localStorage.getItem("scannedList")||"[]");
-let scanner=new Html5Qrcode("reader");
-let scanning=false;
-updateUI();
-start();
-function start(){if(scanning)return;scanner.start({facingMode:"environment"},{fps:10,qrbox:200},onScan).then(()=>scanning=true);}
-function stop(){if(!scanning)return;scanner.stop().then(()=>scanning=false);}
-function beep(ok=true){const ctx=new AudioContext();const o=ctx.createOscillator();o.frequency.value=ok?800:200;o.connect(ctx.destination);o.start();setTimeout(()=>o.stop(),150);} 
-function onScan(text){stop();const invite=invites.find(i=>i.nom.toLowerCase()===text.toLowerCase());if(!invite){beep(false);document.getElementById("status").innerHTML='<span class="alert-err">❌ QR invalide</span>';return;}if(scanned.some(i=>i.nom===invite.nom)){beep(false);document.getElementById("status").innerHTML='<span class="alert-err">⛔ Déjà entré</span>';return;}beep(true);navigator.vibrate?.(200);scanned.push(invite);localStorage.setItem("scannedList",JSON.stringify(scanned));document.getElementById("status").innerHTML='<span class="alert-ok">✅ Accès autorisé</span>';document.getElementById("info").innerHTML=`<b>${invite.nom}</b><br>Personnes : ${invite.personnes}<br>${invite.table}`;updateUI();}
-function updateUI(){document.getElementById("scannedList").innerHTML=scanned.map(i=>`✔️ ${i.nom} (${i.personnes})`).join('<br>');document.getElementById("count").innerText=scanned.length;document.getElementById("totalPeople").innerText=scanned.reduce((t,i)=>t+i.personnes,0);} 
-function restartScanner(){document.getElementById("status").innerText='';document.getElementById("info").innerText='';start();}
-function resetAll(){if(!confirm('Tout effacer ?'))return;scanned=[];localStorage.clear();updateUI();restartScanner();}
-</script>
-</body>
-</html>
+
+const normalize = s =>
+  s.trim().toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "");
+
+let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
+
+scanned.forEach(addToList);
+updateCounter();
+
+function resetScan() {
+  document.getElementById("status").innerText = "";
+  document.getElementById("info").innerHTML = "";
+}
+
+function resetAll() {
+  const code = prompt("Code admin ?");
+  if (code === ADMIN_CODE) {
+    localStorage.removeItem("scannedList");
+    location.reload();
+  }
+}
+
+function addToList(invite) {
+  const li = document.createElement("li");
+  li.textContent = `✅ ${invite.nom} – ${invite.personnes} pers – Table ${invite.table}`;
+  document.getEl
