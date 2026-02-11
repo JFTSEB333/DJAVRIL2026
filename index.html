@@ -14,17 +14,10 @@ body {
   text-align: center;
   padding: 20px;
 }
-.scanner {
-  width: 300px;
-  margin: auto;
-}
-.status {
-  font-size: 1.4em;
-  margin-top: 15px;
-}
+.scanner { width: 300px; margin: auto; }
+.status { font-size: 1.3em; margin-top: 15px; }
 .ok { color: green; }
 .invalid, .already { color: red; }
-
 .scanned-list {
   max-height: 220px;
   overflow-y: auto;
@@ -33,58 +26,143 @@ body {
   padding: 10px;
   border-radius: 8px;
 }
-
-input {
+input, button {
   padding: 10px;
-  font-size: 1em;
-  width: 220px;
-  margin-top: 5px;
-}
-button {
-  padding: 10px 15px;
   font-size: 1em;
   margin: 5px;
 }
-hr {
-  margin: 25px 0;
-}
+hr { margin: 25px 0; }
 </style>
 </head>
 
 <body>
 
 <h1>💍 Entrée Mariage Dorcas & Jefté</h1>
-
 <h3 id="counter">👥 Personnes entrées : 0</h3>
 
-<!-- SCANNER QR -->
 <div id="reader" class="scanner"></div>
 
 <div id="status" class="status"></div>
 <div id="info"></div>
 
-<button onclick="resetScan()">Scanner un autre QR</button>
-<button onclick="resetAll()">🔒 Reset total</button>
+<button onclick="startScanner()">📷 Scanner QR</button>
+<button onclick="stopScanner()">✍️ Mode manuel</button>
+<button onclick="resetAll()">🔒 Reset</button>
 
 <hr>
 
-<!-- MODE MANUEL -->
-<h3>✍️ Recherche manuelle (secours)</h3>
-<input type="text" id="manualName" placeholder="Nom de l'invité">
+<h3>Recherche manuelle (secours)</h3>
+<input id="manualName" placeholder="Nom de l'invité">
 <br>
-<button onclick="manualCheck()">Valider manuellement</button>
+<button onclick="manualCheck()">Valider</button>
 
-<!-- LISTE -->
 <div class="scanned-list">
   <h3>Invités entrés</h3>
   <ul id="scannedList"></ul>
 </div>
 
 <script>
-/* ================== CONFIG ================== */
-const TOKEN_SECRET = "MARIAGE2026";
+/* ================= CONFIG ================= */
 const ADMIN_CODE = "ADMIN2026";
 
-/* LISTE DES INVITÉS AUTORISÉS */
 const invitesAutorises = [
   { nom: "Naomi", personnes: 1, table: 3 },
+  { nom: "Couple Maro", personnes: 2, table: 3 },
+  { nom: "Couple Jésuane", personnes: 2, table: 3 },
+  { nom: "Dicap's", personnes: 2, table: 3 },
+  { nom: "Ritchy", personnes: 1, table: 3 },
+  { nom: "Ivana", personnes: 1, table: 3 }
+];
+
+/* ================= UTILS ================= */
+const normalize = s =>
+  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
+
+scanned.forEach(addToList);
+updateCounter();
+
+/* ================= QR ================= */
+let qr = null;
+let scanning = false;
+
+function startScanner() {
+  if (scanning) return;
+
+  qr = new Html5Qrcode("reader");
+  qr.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    onQrScan
+  );
+  scanning = true;
+}
+
+function stopScanner() {
+  if (!qr || !scanning) return;
+
+  qr.stop().then(() => {
+    scanning = false;
+    document.getElementById("reader").innerHTML = "";
+  });
+}
+
+function onQrScan(text) {
+  try {
+    const data = JSON.parse(text);
+    processEntry(data.nom, data.personnes, data.table, "QR");
+    stopScanner();
+  } catch {
+    showStatus("QR invalide", "invalid");
+  }
+}
+
+/* ================= MANUEL ================= */
+function manualCheck() {
+  stopScanner();
+
+  const input = document.getElementById("manualName");
+  const search = normalize(input.value);
+
+  if (!search) {
+    showStatus("Entre un nom", "invalid");
+    return;
+  }
+
+  const invite = invitesAutorises.find(i =>
+    normalize(i.nom).includes(search)
+  );
+
+  if (!invite) {
+    showStatus("Invité non trouvé", "invalid");
+    return;
+  }
+
+  processEntry(invite.nom, invite.personnes, invite.table, "manuel");
+  input.value = "";
+}
+
+/* ================= LOGIQUE CENTRALE ================= */
+function processEntry(nom, personnes, table, source) {
+  const nameNorm = normalize(nom);
+
+  if (scanned.find(s => normalize(s.nom) === nameNorm)) {
+    showStatus("Déjà scanné", "already");
+    return;
+  }
+
+  const data = { nom, personnes, table };
+  scanned.push(data);
+  localStorage.setItem("scannedList", JSON.stringify(scanned));
+
+  showStatus(`Invitation valide (${source})`, "ok");
+
+  document.getElementById("info").innerHTML = `
+    <p><strong>Nom :</strong> ${nom}</p>
+    <p><strong>Personnes :</strong> ${personnes}</p>
+    <p><strong>Table :</strong> ${table}</p>
+  `;
+
+  navigator.vibrate?.(200);
+  addToLis
