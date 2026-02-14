@@ -14,19 +14,29 @@ body {
   text-align: center;
   padding: 20px;
 }
-.scanner { width: 300px; margin: auto; }
-.status { font-size: 1.3em; margin-top: 15px; }
+.scanner { width: 320px; margin: auto; }
+.status { font-size: 1.2em; margin: 10px 0; }
 .ok { color: green; }
 .invalid, .already { color: red; }
 
-.scanned-list {
+.results, .scanned-list {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 15px;
   max-height: 220px;
   overflow-y: auto;
-  margin-top: 25px;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
 }
+
+.result {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+.result:hover {
+  background: #e8f0fe;
+}
+
 input, button {
   padding: 10px;
   font-size: 1em;
@@ -41,7 +51,6 @@ hr { margin: 25px 0; }
 <h1>💍 Entrée Mariage Dorcas & Jefté</h1>
 <h3 id="counter">👥 Personnes entrées : 0</h3>
 
-<!-- CAMERA AUTO -->
 <div id="reader" class="scanner"></div>
 
 <div id="status" class="status"></div>
@@ -49,11 +58,12 @@ hr { margin: 25px 0; }
 
 <hr>
 
-<!-- MODE MANUEL -->
-<h3>Recherche manuelle (secours)</h3>
-<input id="manualName" placeholder="Nom de l'invité">
-<br>
-<button onclick="manualCheck()">Valider</button>
+<h3>🔍 Recherche manuelle (secours)</h3>
+<input id="manualInput" placeholder="Tape le nom…" oninput="searchInvite()">
+
+<div id="results" class="results"></div>
+
+<button onclick="validateManual()">✅ Valider l’entrée</button>
 <button onclick="resetAll()">🔒 Reset</button>
 
 <div class="scanned-list">
@@ -64,144 +74,139 @@ hr { margin: 25px 0; }
 <script>
 /* ================= CONFIG ================= */
 const ADMIN_CODE = "ADMIN2026";
-let invitesAutorises = [];
+let invites = [];
+let selectedInvite = null;
+let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
 
 /* ================= UTILS ================= */
 const normalize = s =>
   s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
-
-/* ================= LOAD BASE CSV ================= */
+/* ================= LOAD CSV ================= */
 async function loadInvites() {
-  try {
-    const res = await fetch("invites.csv");
-    const text = await res.text();
-    const lines = text.trim().split("\n").slice(1);
+  const res = await fetch("invites.csv");
+  const text = await res.text();
+  const lines = text.trim().split("\n").slice(1);
 
-    invitesAutorises = lines.map(l => {
-      const [nom, personnes, table] = l.split(",");
-      return {
-        nom: nom.trim(),
-        personnes: Number(personnes),
-        table: Number(table)
-      };
-    });
+  invites = lines.map(l => {
+    const [nom, personnes, table] = l.split(",");
+    return { nom, personnes: +personnes, table: +table };
+  });
 
-    scanned.forEach(addToList);
-    updateCounter();
-  } catch (e) {
-    showStatus("❌ Base invités introuvable", "invalid");
-  }
+  scanned.forEach(addToList);
+  updateCounter();
 }
-
 loadInvites();
 
-/* ================= CAMERA AUTO ================= */
+/* ================= CAMERA ================= */
 const qr = new Html5Qrcode("reader");
-
-window.addEventListener("load", () => {
-  qr.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    onQrScan
-  ).catch(() => {
-    showStatus("Autorise la caméra", "invalid");
-  });
-});
-
-/* ================= QR ================= */
-function onQrScan(text) {
-  try {
-    const data = JSON.parse(text);
-    processEntry(data.nom, data.personnes, data.table, "QR");
-  } catch {
-    showStatus("QR invalide", "invalid");
+qr.start(
+  { facingMode: "environment" },
+  { fps: 10, qrbox: 250 },
+  text => {
+    try {
+      const d = JSON.parse(text);
+      processEntry(d.nom, d.personnes, d.table, "QR");
+    } catch {
+      showStatus("QR invalide", "invalid");
+    }
   }
-}
+);
 
-/* ================= MANUEL ================= */
-function manualCheck() {
-  const input = document.getElementById("manualName");
-  const search = normalize(input.value);
+/* ================= RECHERCHE MANUELLE ================= */
+function searchInvite() {
+  const q = normalize(document.getElementById("manualInput").value);
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+  selectedInvite = null;
+  document.getElementById("info").innerHTML = "";
 
-  if (!search) {
-    showStatus("Entre un nom", "invalid");
-    return;
-  }
+  if (!q) return;
 
-  const invite = invitesAutorises.find(i =>
-    normalize(i.nom).includes(search)
+  const matches = invites.filter(i =>
+    normalize(i.nom).includes(q)
   );
 
-  if (!invite) {
-    showStatus("Invité non trouvé", "invalid");
+  if (!matches.length) {
+    resultsDiv.innerHTML = "<em>Aucun invité trouvé</em>";
     return;
   }
 
-  processEntry(invite.nom, invite.personnes, invite.table, "manuel");
-  input.value = "";
+  matches.forEach(inv => {
+    const div = document.createElement("div");
+    div.className = "result";
+    div.innerHTML = `
+      <strong>${inv.nom}</strong><br>
+      ${inv.personnes} pers – Table ${inv.table}
+    `;
+    div.onclick = () => {
+      selectedInvite = inv;
+      showStatus("Invité sélectionné ✅", "ok");
+      document.getElementById("info").innerHTML = `
+        <p><strong>Nom :</strong> ${inv.nom}</p>
+        <p><strong>Personnes :</strong> ${inv.personnes}</p>
+        <p><strong>Table :</strong> ${inv.table}</p>
+      `;
+    };
+    resultsDiv.appendChild(div);
+  });
+}
+
+/* ================= VALIDATION MANUELLE ================= */
+function validateManual() {
+  if (!selectedInvite) {
+    showStatus("Sélectionne un invité", "invalid");
+    return;
+  }
+
+  processEntry(
+    selectedInvite.nom,
+    selectedInvite.personnes,
+    selectedInvite.table,
+    "manuel"
+  );
+
+  document.getElementById("manualInput").value = "";
+  document.getElementById("results").innerHTML = "";
+  selectedInvite = null;
 }
 
 /* ================= LOGIQUE CENTRALE ================= */
 function processEntry(nom, personnes, table, source) {
-  const nameNorm = normalize(nom);
-
-  if (scanned.find(s => normalize(s.nom) === nameNorm)) {
-    showStatus("Déjà scanné", "already");
+  if (scanned.find(s => normalize(s.nom) === normalize(nom))) {
+    showStatus("Déjà entré", "already");
     return;
   }
 
-  const valid = invitesAutorises.find(i =>
-    normalize(i.nom) === nameNorm &&
-    i.personnes === personnes &&
-    i.table === table
-  );
-
-  if (!valid) {
-    showStatus("Invitation non reconnue", "invalid");
-    return;
-  }
-
-  const data = { nom, personnes, table };
-  scanned.push(data);
+  scanned.push({ nom, personnes, table });
   localStorage.setItem("scannedList", JSON.stringify(scanned));
 
-  showStatus(`Invitation valide (${source})`, "ok");
-
-  document.getElementById("info").innerHTML = `
-    <p><strong>Nom :</strong> ${nom}</p>
-    <p><strong>Personnes :</strong> ${personnes}</p>
-    <p><strong>Table :</strong> ${table}</p>
-  `;
-
-  navigator.vibrate?.(200);
-  addToList(data);
+  showStatus(`Entrée validée (${source})`, "ok");
+  addToList({ nom, personnes, table });
   updateCounter();
 }
 
 /* ================= UI ================= */
 function showStatus(msg, cls) {
   const s = document.getElementById("status");
-  s.innerText = msg;
+  s.textContent = msg;
   s.className = "status " + cls;
 }
 
-function addToList(invite) {
+function addToList(i) {
   const li = document.createElement("li");
-  li.textContent = `✅ ${invite.nom} – ${invite.personnes} pers – Table ${invite.table}`;
+  li.textContent = `✅ ${i.nom} – ${i.personnes} pers – Table ${i.table}`;
   document.getElementById("scannedList").appendChild(li);
 }
 
 function updateCounter() {
   const total = scanned.reduce((s, i) => s + i.personnes, 0);
-  document.getElementById("counter").innerText =
+  document.getElementById("counter").textContent =
     `👥 Personnes entrées : ${total}`;
 }
 
 function resetAll() {
-  const code = prompt("Code admin ?");
-  if (code === ADMIN_CODE) {
+  if (prompt("Code admin ?") === ADMIN_CODE) {
     localStorage.clear();
     location.reload();
   }
