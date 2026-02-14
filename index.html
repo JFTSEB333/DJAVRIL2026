@@ -41,7 +41,7 @@ hr { margin: 25px 0; }
 <h1>💍 Entrée Mariage Dorcas & Jefté</h1>
 <h3 id="counter">👥 Personnes entrées : 0</h3>
 
-<!-- CAMÉRA AUTO -->
+<!-- CAMERA AUTO -->
 <div id="reader" class="scanner"></div>
 
 <div id="status" class="status"></div>
@@ -64,15 +64,7 @@ hr { margin: 25px 0; }
 <script>
 /* ================= CONFIG ================= */
 const ADMIN_CODE = "ADMIN2026";
-
-const invitesAutorises = [
-  { nom: "Naomi", personnes: 1, table: 3 },
-  { nom: "Couple Maro", personnes: 2, table: 3 },
-  { nom: "Couple Jésuane", personnes: 2, table: 3 },
-  { nom: "Dicap's", personnes: 2, table: 3 },
-  { nom: "Ritchy", personnes: 1, table: 3 },
-  { nom: "Ivana", personnes: 1, table: 3 }
-];
+let invitesAutorises = [];
 
 /* ================= UTILS ================= */
 const normalize = s =>
@@ -80,8 +72,30 @@ const normalize = s =>
 
 let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
 
-scanned.forEach(addToList);
-updateCounter();
+/* ================= LOAD BASE CSV ================= */
+async function loadInvites() {
+  try {
+    const res = await fetch("invites.csv");
+    const text = await res.text();
+    const lines = text.trim().split("\n").slice(1);
+
+    invitesAutorises = lines.map(l => {
+      const [nom, personnes, table] = l.split(",");
+      return {
+        nom: nom.trim(),
+        personnes: Number(personnes),
+        table: Number(table)
+      };
+    });
+
+    scanned.forEach(addToList);
+    updateCounter();
+  } catch (e) {
+    showStatus("❌ Base invités introuvable", "invalid");
+  }
+}
+
+loadInvites();
 
 /* ================= CAMERA AUTO ================= */
 const qr = new Html5Qrcode("reader");
@@ -135,6 +149,17 @@ function processEntry(nom, personnes, table, source) {
 
   if (scanned.find(s => normalize(s.nom) === nameNorm)) {
     showStatus("Déjà scanné", "already");
+    return;
+  }
+
+  const valid = invitesAutorises.find(i =>
+    normalize(i.nom) === nameNorm &&
+    i.personnes === personnes &&
+    i.table === table
+  );
+
+  if (!valid) {
+    showStatus("Invitation non reconnue", "invalid");
     return;
   }
 
