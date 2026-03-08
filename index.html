@@ -14,8 +14,14 @@ body {
   text-align: center;
   padding: 20px;
 }
-.scanner { width: 320px; margin: auto; }
-.status { font-size: 1.2em; margin: 10px 0; }
+.scanner {
+  width: 320px;
+  margin: auto;
+}
+.status {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
 .ok { color: green; }
 .invalid, .already { color: red; }
 
@@ -33,14 +39,18 @@ body {
   border-bottom: 1px solid #eee;
   cursor: pointer;
 }
-.result:hover { background: #e8f0fe; }
+.result:hover {
+  background: #e8f0fe;
+}
 
 input, button {
   padding: 10px;
   font-size: 1em;
   margin: 5px;
 }
-hr { margin: 25px 0; }
+hr {
+  margin: 25px 0;
+}
 </style>
 </head>
 
@@ -73,7 +83,7 @@ hr { margin: 25px 0; }
 /* ================= CONFIG ================= */
 const ADMIN_CODE = "ADMIN2026";
 
-/* ================= INVITES (depuis ton Excel - nettoyés) ================= */
+/* ================= INVITES ================= */
 const INVITES = [
   {"nom": "Couple Nanouche", "personnes": 2, "table": 1},
   {"nom": "Couple Clarisse", "personnes": 2, "table": 1},
@@ -167,10 +177,10 @@ const INVITES = [
   {"nom": "Couple Cedric", "personnes": 2, "table": 13},
   {"nom": "Couple Sara Miezi", "personnes": 2, "table": 13},
   {"nom": "Christina", "personnes": 1, "table": 13},
-  {"nom":"Fortini","personnes":1,"table":13}
-  {"nom":"Helder","personnes":1,"table":13}
-  {"nom":"Yves","personnes":1,"table":13}
-  {"nom":"Alain OMO","personnes":1,"table":13}
+  {"nom": "Fortini", "personnes": 1, "table": 13},
+  {"nom": "Helder", "personnes": 1, "table": 13},
+  {"nom": "Yves", "personnes": 1, "table": 13},
+  {"nom": "Alain OMO", "personnes": 1, "table": 13},
   {"nom": "Delphine", "personnes": 1, "table": 14},
   {"nom": "Chantal", "personnes": 1, "table": 14},
   {"nom": "Emerick", "personnes": 1, "table": 14},
@@ -338,11 +348,14 @@ const INVITES = [
   {"nom": "Couple Glodi", "personnes": 2, "table": 40},
   {"nom": "Couple Gloire", "personnes": 2, "table": 40},
   {"nom": "Rufus M.", "personnes": 1, "table": 40},
-  {"nom": "Lyly N", "personnes": 1, "table": 40}];
+  {"nom": "Lyly N", "personnes": 1, "table": 40}
+];
+
 /* ================= STATE ================= */
 let invites = INVITES;
 let selectedInvite = null;
 let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
+let qr = null;
 
 /* ================= UTILS ================= */
 const normalize = s =>
@@ -357,24 +370,29 @@ const normalize = s =>
 /* ================= INIT ================= */
 scanned.forEach(addToList);
 updateCounter();
+startCamera();
 
 /* ================= CAMERA ================= */
-const qr = new Html5Qrcode("reader");
-qr.start(
-  { facingMode: "environment" },
-  { fps: 10, qrbox: 250 },
-  text => {
-    try {
-      const d = JSON.parse(text);
-      processEntry(d.nom, d.personnes, d.table, "QR");
-    } catch {
-      showStatus("QR invalide", "invalid");
-    }
-  },
-  err => {}
-).catch(() => {
-  showStatus("Autorise la caméra puis recharge la page", "invalid");
-});
+function startCamera() {
+  qr = new Html5Qrcode("reader");
+
+  qr.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    text => {
+      try {
+        const d = JSON.parse(text);
+        processEntry(d.nom, d.personnes, d.table, "QR");
+      } catch (e) {
+        showStatus("QR invalide", "invalid");
+      }
+    },
+    errorMessage => {}
+  ).catch(err => {
+    console.error(err);
+    showStatus("Autorise la caméra puis recharge la page", "invalid");
+  });
+}
 
 /* ================= RECHERCHE MANUELLE ================= */
 function searchInvite() {
@@ -467,12 +485,11 @@ function resetAll() {
     location.reload();
   }
 }
+
+window.onerror = function(message, source, lineno) {
+  showStatus("Erreur ligne " + lineno + " : " + message, "invalid");
+};
 </script>
 
 </body>
 </html>
-
-
-
-
-
