@@ -43,13 +43,37 @@ body {
   background: #e8f0fe;
 }
 
-input, button {
+input, button, textarea {
   padding: 10px;
   font-size: 1em;
   margin: 5px;
 }
 hr {
   margin: 25px 0;
+}
+
+#noteBox {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 15px auto;
+  max-width: 500px;
+  display: none;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+#noteEditor {
+  width: 100%;
+  min-height: 90px;
+  display: none;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
 }
 </style>
 </head>
@@ -63,6 +87,16 @@ hr {
 
 <div id="status" class="status"></div>
 <div id="info"></div>
+
+<div id="noteBox">
+  <div style="font-weight:bold; margin-bottom:8px;">⚠️ Note accueil</div>
+  <div id="noteDisplay" style="margin-bottom:10px;"></div>
+  <textarea id="noteEditor"></textarea>
+  <div style="margin-top:10px;">
+    <button id="editNoteBtn" onclick="editCurrentNote()" style="display:none;">✏️ Éditer</button>
+    <button id="saveNoteBtn" onclick="saveCurrentNote()" style="display:none;">💾 Sauvegarder</button>
+  </div>
+</div>
 
 <hr>
 
@@ -351,11 +385,22 @@ const INVITES = [
   {"nom": "Lyly N", "personnes": 1, "table": 40}
 ];
 
+/* ================= NOTES / CHANGEMENTS ================= */
+const DEFAULT_NOTES_ACCUEIL = [
+  { nom: "Couple Paulo", note: "Installer table 40" },
+  { nom: "Rebecca", note: "Bien vérifier la bonne table avant installation" }
+];
+
+let NOTES_ACCUEIL = JSON.parse(
+  localStorage.getItem("notesAccueil") || JSON.stringify(DEFAULT_NOTES_ACCUEIL)
+);
+
 /* ================= STATE ================= */
 let invites = INVITES;
 let selectedInvite = null;
 let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
 let qr = null;
+window.currentDisplayedInviteName = null;
 
 /* ================= UTILS ================= */
 const normalize = s =>
@@ -367,8 +412,10 @@ const normalize = s =>
     .replace(/\s+/g, " ")
     .trim();
 
+const getInviteKey = (nom, table) => `${normalize(nom)}__${Number(table) || 0}`;
+
 /* ================= INIT ================= */
-scanned.forEach(addToList);
+renderScannedList();
 updateCounter();
 startCamera();
 
@@ -394,6 +441,100 @@ function startCamera() {
   });
 }
 
+/* ================= NOTES ================= */
+function getAccueilNote(nom) {
+  return NOTES_ACCUEIL.find(n => normalize(n.nom) === normalize(nom));
+}
+
+function showAccueilNote(nom) {
+  const noteBox = document.getElementById("noteBox");
+  const noteDisplay = document.getElementById("noteDisplay");
+  const noteEditor = document.getElementById("noteEditor");
+  const editBtn = document.getElementById("editNoteBtn");
+  const saveBtn = document.getElementById("saveNoteBtn");
+
+  const match = getAccueilNote(nom);
+
+  if (match) {
+    noteDisplay.innerHTML = `<strong>${match.nom}</strong> : ${match.note}`;
+    noteEditor.value = match.note;
+  } else {
+    noteDisplay.innerHTML = `<strong>${nom}</strong> : aucune note`;
+    noteEditor.value = "";
+  }
+
+  noteEditor.style.display = "none";
+  noteDisplay.style.display = "block";
+  noteBox.style.display = "block";
+  editBtn.style.display = "inline-block";
+  saveBtn.style.display = "none";
+}
+
+function editCurrentNote() {
+  if (!window.currentDisplayedInviteName) {
+    showStatus("Aucun invité sélectionné", "invalid");
+    return;
+  }
+
+  const code = prompt("Code admin ?");
+  if (code !== ADMIN_CODE) {
+    showStatus("Code admin incorrect", "invalid");
+    return;
+  }
+
+  const noteDisplay = document.getElementById("noteDisplay");
+  const noteEditor = document.getElementById("noteEditor");
+  const saveBtn = document.getElementById("saveNoteBtn");
+
+  noteDisplay.style.display = "none";
+  noteEditor.style.display = "block";
+  saveBtn.style.display = "inline-block";
+}
+
+function saveCurrentNote() {
+  const nom = window.currentDisplayedInviteName;
+  if (!nom) {
+    showStatus("Aucun invité sélectionné", "invalid");
+    return;
+  }
+
+  const code = prompt("Code admin ?");
+  if (code !== ADMIN_CODE) {
+    showStatus("Code admin incorrect", "invalid");
+    return;
+  }
+
+  const noteEditor = document.getElementById("noteEditor");
+  const nouvelleNote = noteEditor.value.trim();
+  const existingIndex = NOTES_ACCUEIL.findIndex(n => normalize(n.nom) === normalize(nom));
+
+  if (nouvelleNote) {
+    if (existingIndex >= 0) {
+      NOTES_ACCUEIL[existingIndex].note = nouvelleNote;
+    } else {
+      NOTES_ACCUEIL.push({ nom, note: nouvelleNote });
+    }
+  } else {
+    if (existingIndex >= 0) {
+      NOTES_ACCUEIL.splice(existingIndex, 1);
+    }
+  }
+
+  localStorage.setItem("notesAccueil", JSON.stringify(NOTES_ACCUEIL));
+  showAccueilNote(nom);
+  showStatus("Note sauvegardée", "ok");
+}
+
+function clearAccueilNoteBox() {
+  document.getElementById("noteBox").style.display = "none";
+  document.getElementById("noteDisplay").innerHTML = "";
+  document.getElementById("noteEditor").value = "";
+  document.getElementById("noteEditor").style.display = "none";
+  document.getElementById("editNoteBtn").style.display = "none";
+  document.getElementById("saveNoteBtn").style.display = "none";
+  window.currentDisplayedInviteName = null;
+}
+
 /* ================= RECHERCHE MANUELLE ================= */
 function searchInvite() {
   const q = normalize(document.getElementById("manualInput").value);
@@ -402,12 +543,16 @@ function searchInvite() {
   selectedInvite = null;
   document.getElementById("info").innerHTML = "";
 
-  if (!q) return;
+  if (!q) {
+    clearAccueilNoteBox();
+    return;
+  }
 
   const matches = invites.filter(i => normalize(i.nom).includes(q));
 
   if (!matches.length) {
     resultsDiv.innerHTML = "<em>Aucun invité trouvé</em>";
+    clearAccueilNoteBox();
     return;
   }
 
@@ -420,12 +565,15 @@ function searchInvite() {
     `;
     div.onclick = () => {
       selectedInvite = inv;
+      window.currentDisplayedInviteName = inv.nom;
+
       showStatus("Invité sélectionné ✅", "ok");
       document.getElementById("info").innerHTML = `
         <p><strong>Nom :</strong> ${inv.nom}</p>
         <p><strong>Personnes :</strong> ${inv.personnes}</p>
         <p><strong>Table :</strong> ${inv.table}</p>
       `;
+      showAccueilNote(inv.nom);
     };
     resultsDiv.appendChild(div);
   });
@@ -442,23 +590,39 @@ function validateManual() {
 
   document.getElementById("manualInput").value = "";
   document.getElementById("results").innerHTML = "";
-  document.getElementById("info").innerHTML = "";
   selectedInvite = null;
 }
 
 /* ================= LOGIQUE CENTRALE ================= */
 function processEntry(nom, personnes, table, source) {
-  if (scanned.find(s => normalize(s.nom) === normalize(nom))) {
+  const key = getInviteKey(nom, table);
+
+  if (scanned.find(s => getInviteKey(s.nom, s.table) === key)) {
     showStatus("Déjà entré", "already");
     return;
   }
 
-  scanned.push({ nom, personnes, table });
+  const entry = {
+    nom,
+    personnes: Number(personnes) || 0,
+    table: Number(table) || 0
+  };
+
+  scanned.push(entry);
   localStorage.setItem("scannedList", JSON.stringify(scanned));
 
   showStatus(`Entrée validée (${source})`, "ok");
-  addToList({ nom, personnes, table });
+  renderScannedList();
   updateCounter();
+
+  document.getElementById("info").innerHTML = `
+    <p><strong>Nom :</strong> ${entry.nom}</p>
+    <p><strong>Personnes :</strong> ${entry.personnes}</p>
+    <p><strong>Table :</strong> ${entry.table}</p>
+  `;
+
+  window.currentDisplayedInviteName = entry.nom;
+  showAccueilNote(entry.nom);
 }
 
 /* ================= UI ================= */
@@ -468,10 +632,15 @@ function showStatus(msg, cls) {
   s.className = "status " + cls;
 }
 
-function addToList(i) {
-  const li = document.createElement("li");
-  li.textContent = `✅ ${i.nom} – ${i.personnes} pers – Table ${i.table}`;
-  document.getElementById("scannedList").appendChild(li);
+function renderScannedList() {
+  const ul = document.getElementById("scannedList");
+  ul.innerHTML = "";
+
+  scanned.forEach(i => {
+    const li = document.createElement("li");
+    li.textContent = `✅ ${i.nom} – ${i.personnes} pers – Table ${i.table}`;
+    ul.appendChild(li);
+  });
 }
 
 function updateCounter() {
@@ -481,8 +650,15 @@ function updateCounter() {
 
 function resetAll() {
   if (prompt("Code admin ?") === ADMIN_CODE) {
-    localStorage.clear();
-    location.reload();
+    localStorage.removeItem("scannedList");
+    scanned = [];
+    renderScannedList();
+    updateCounter();
+    document.getElementById("info").innerHTML = "";
+    document.getElementById("results").innerHTML = "";
+    document.getElementById("manualInput").value = "";
+    clearAccueilNoteBox();
+    showStatus("Liste réinitialisée", "ok");
   }
 }
 
