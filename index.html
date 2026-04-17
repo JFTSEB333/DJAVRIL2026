@@ -165,93 +165,355 @@ const CHANGEMENTS_TABLES = [
   { nom: "Adelina", personnes: 2, table: 3 },
   { nom: "Couple Richard", personnes: 2, table: 38 },
   { nom: "ZiZly", personnes: 1, table: 3 },
-  { nom: "couple Gerry", personnes: 2, table: 42 }
+  { nom: "couple Gerry", personnes: 2, table: 42 },
+  { nom: "Fayad", personnes: 2, table: 28 },
+  { nom: "DMCEE", personnes: 3, table: 28 }
 ];
 
 /* ================= INVITES ================= */
 const INVITES = [
-  {"nom":"Couple Nanouche","personnes":2,"table":1},
-  {"nom":"Couple Clarisse","personnes":2,"table":1},
-  {"nom":"Couple Ritchy","personnes":2,"table":1},
-  {"nom":"Couple Maray","personnes":2,"table":1},
-  {"nom":"CHIMENE","personnes":1,"table":1},
-  {"nom":"FANNY","personnes":1,"table":1},
-  {"nom":"Naellle","personnes":1,"table":1},
+  { nom: "Couple Nanouche", personnes: 2, table: 1 },
+  { nom: "Couple Clarisse", personnes: 2, table: 1 },
+  { nom: "Couple Ritchy", personnes: 2, table: 1 },
+  { nom: "Couple Maray", personnes: 2, table: 1 },
+  { nom: "CHIMENE", personnes: 1, table: 1 },
+  { nom: "FANNY", personnes: 1, table: 1 },
+  { nom: "Naellle", personnes: 1, table: 1 },
 
-  {"nom":"Couple NKIESA Papa / Maman","personnes":2,"table":2},
-  {"nom":"Couple Bruston","personnes":2,"table":2},
-  {"nom":"Couple Patrick","personnes":2,"table":2},
-  {"nom":"Couple GOMBE","personnes":2,"table":2},
-  {"nom":"Couple Berry - Maguy","personnes":2,"table":2},
-  {"nom":"Brayden","personnes":1,"table":2},
+  { nom: "Couple NKIESA Papa / Maman", personnes: 2, table: 2 },
+  { nom: "Couple Bruston", personnes: 2, table: 2 },
+  { nom: "Couple Patrick", personnes: 2, table: 2 },
+  { nom: "Couple GOMBE", personnes: 2, table: 2 },
+  { nom: "Couple Berry - Maguy", personnes: 2, table: 2 },
+  { nom: "Brayden", personnes: 1, table: 2 },
 
-  {"nom":"Couple SEBASTIAO Papa / Maman","personnes":2,"table":3},
-  {"nom":"Couple Landu","personnes":2,"table":3},
-  {"nom":"Couple Jean - Eve","personnes":2,"table":3},
-  {"nom":"Astrid","personnes":1,"table":3},
-  {"nom":"Ma Micho","personnes":1,"table":3},
-  {"nom":"Suzy","personnes":1,"table":3},
-  {"nom":"Jean Ndala","personnes":1,"table":3},
+  { nom: "Couple SEBASTIAO Papa / Maman", personnes: 2, table: 3 },
+  { nom: "Couple Landu", personnes: 2, table: 3 },
+  { nom: "Couple Jean - Eve", personnes: 2, table: 3 },
+  { nom: "Astrid", personnes: 1, table: 3 },
+  { nom: "Ma Micho", personnes: 1, table: 3 },
+  { nom: "Suzy", personnes: 1, table: 3 },
+  { nom: "Jean Ndala", personnes: 1, table: 3 },
 
-  {"nom":"Maria Sebastiao","personnes":1,"table":4},
-  {"nom":"Keren M","personnes":1,"table":4},
-  {"nom":"Alexia L","personnes":1,"table":4},
-  {"nom":"SteffieL","personnes":2,"table":4},
-  {"nom":"Sintiche S","personnes":1,"table":4},
-  {"nom":"Rafaela M","personnes":1,"table":4},
-  {"nom":"Sublime M","personnes":1,"table":4},
-  {"nom":"Aymen","personnes":1,"table":4},
-  {"nom":"Candice","personnes":1,"table":4},
-  {"nom":"Maria K","personnes":1,"table":4},
+  { nom: "Maria Sebastiao", personnes: 1, table: 4 },
+  { nom: "Keren M", personnes: 1, table: 4 },
+  { nom: "Alexia L", personnes: 1, table: 4 },
+  { nom: "SteffieL", personnes: 2, table: 4 },
+  { nom: "Sintiche S", personnes: 1, table: 4 },
+  { nom: "Rafaela M", personnes: 1, table: 4 },
+  { nom: "Sublime M", personnes: 1, table: 4 },
+  { nom: "Aymen", personnes: 1, table: 4 },
+  { nom: "Candice", personnes: 1, table: 4 },
+  { nom: "Maria K", personnes: 1, table: 4 },
 
-  {"nom":"Alisson PAKA","personnes":1,"table":5},
-  {"nom":"Couple Djenny Daphnée","personnes":2,"table":5},
-  {"nom":"Tabitha","personnes":1,"table":5},
-  {"nom":"Valérie","personnes":1,"table":5},
-  {"nom":"Trecy","personnes":1,"table":5},
-  {"nom":"Exaucé et prisca SHAKO BOUR","personnes":2,"table":5},
-  {"nom":"Tend","personnes":2,"table":5},
-  {"nom":"Godin","personnes":1,"table":5},
+  { nom: "Alisson PAKA", personnes: 1, table: 5 },
+  { nom: "Couple Djenny Daphnée", personnes: 2, table: 5 },
+  { nom: "Tabitha", personnes: 1, table: 5 },
+  { nom: "Valérie", personnes: 1, table: 5 },
+  { nom: "Trecy", personnes: 1, table: 5 },
+  { nom: "Exaucé et prisca SHAKO BOUR", personnes: 2, table: 5 },
+  { nom: "Tend", personnes: 2, table: 5 },
+  { nom: "Godin", personnes: 1, table: 5 },
 
-  {"nom":"Natacha","personnes":1,"table":6},
-  {"nom":"Fifi","personnes":1,"table":6},
-  {"nom":"Couple Ariana","personnes":2,"table":6},
-  {"nom":"ARLETTE","personnes":1,"table":6},
-  {"nom":"Brusma","personnes":1,"table":6},
-  {"nom":"Brithany","personnes":1,"table":6},
+  { nom: "Natacha", personnes: 1, table: 6 },
+  { nom: "Fifi", personnes: 1, table: 6 },
+  { nom: "Couple Ariana", personnes: 2, table: 6 },
+  { nom: "ARLETTE", personnes: 1, table: 6 },
+  { nom: "Brusma", personnes: 1, table: 6 },
+  { nom: "Brithany", personnes: 1, table: 6 },
 
-  {"nom":"Couple Kalik","personnes":2,"table":7},
-  {"nom":"Maman Ruth LEMA","personnes":1,"table":7},
-  {"nom":"Tonton Fly","personnes":1,"table":7},
-  {"nom":"Collègue maman","personnes":1,"table":7},
-  {"nom":"Ma Paupau","personnes":1,"table":7},
-  {"nom":"Ya Marly NKIESA","personnes":1,"table":7},
-  {"nom":"heritier","personnes":1,"table":7},
-  {"nom":"grace Nzonza","personnes":3,"table":7},
+  { nom: "Couple Kalik", personnes: 2, table: 7 },
+  { nom: "Maman Ruth LEMA", personnes: 1, table: 7 },
+  { nom: "Tonton Fly", personnes: 1, table: 7 },
+  { nom: "Collègue maman", personnes: 1, table: 7 },
+  { nom: "Ma Paupau", personnes: 1, table: 7 },
+  { nom: "Ya Marly NKIESA", personnes: 1, table: 7 },
+  { nom: "heritier", personnes: 1, table: 7 },
+  { nom: "grace Nzonza", personnes: 3, table: 7 },
 
-  {"nom":"Couple Mavitidi","personnes":2,"table":8},
-  {"nom":"Couple Paulin - Bena","personnes":2,"table":8},
-  {"nom":"Couple Carine","personnes":2,"table":8},
-  {"nom":"enfant carine","personnes":3,"table":8},
-  {"nom":"Couple Kavungu","personnes":2,"table":8},
+  { nom: "Couple Mavitidi", personnes: 2, table: 8 },
+  { nom: "Couple Paulin - Bena", personnes: 2, table: 8 },
+  { nom: "Couple Carine", personnes: 2, table: 8 },
+  { nom: "enfant carine", personnes: 3, table: 8 },
+  { nom: "Couple Kavungu", personnes: 2, table: 8 },
 
-  {"nom":"Couple Simon","personnes":2,"table":9},
-  {"nom":"Couple Nicha","personnes":2,"table":9},
-  {"nom":"Couple Akim","personnes":2,"table":9},
-  {"nom":"Couple Charlotte","personnes":2,"table":9},
-  {"nom":"couple Afonso","personnes":2,"table":9},
-  {"nom":"Ya Zizi","personnes":1,"table":9},
+  { nom: "Couple Simon", personnes: 2, table: 9 },
+  { nom: "Couple Nicha", personnes: 2, table: 9 },
+  { nom: "Couple Akim", personnes: 2, table: 9 },
+  { nom: "Couple Charlotte", personnes: 2, table: 9 },
+  { nom: "couple Afonso", personnes: 2, table: 9 },
+  { nom: "Ya Zizi", personnes: 1, table: 9 },
 
-  {"nom":"Nathan","personnes":1,"table":10},
-  {"nom":"Laurentha","personnes":1,"table":10},
-  {"nom":"Samprass","personnes":1,"table":10},
-  {"nom":"Emilio CAVA","personnes":1,"table":10},
-  {"nom":"Rodrick BOKELI","personnes":1,"table":10},
-  {"nom":"Couple NELIO","personnes":2,"table":10},
-  {"nom":"Berthy","personnes":1,"table":10},
-  {"nom":"Naomi LEMA","personnes":1,"table":10},
+  { nom: "Nathan", personnes: 1, table: 10 },
+  { nom: "Laurentha", personnes: 1, table: 10 },
+  { nom: "Samprass", personnes: 1, table: 10 },
+  { nom: "Emilio CAVA", personnes: 1, table: 10 },
+  { nom: "Rodrick BOKELI", personnes: 1, table: 10 },
+  { nom: "Couple NELIO", personnes: 2, table: 10 },
+  { nom: "Berthy", personnes: 1, table: 10 },
+  { nom: "Naomi LEMA", personnes: 1, table: 10 },
 
-  {"nom":"Florance","personnes":1,"table":32}
+  { nom: "Manassé F", personnes: 1, table: 11 },
+  { nom: "Jessica F", personnes: 1, table: 11 },
+  { nom: "Sara M.", personnes: 2, table: 11 },
+  { nom: "Lady", personnes: 1, table: 11 },
+  { nom: "Cintia", personnes: 1, table: 11 },
+  { nom: "Couple Dodo", personnes: 2, table: 11 },
+  { nom: "Couple Maguy - Kikas", personnes: 2, table: 11 },
+  { nom: "Karel Hair (presta)", personnes: 1, table: 11 },
+
+  { nom: "Sainticia", personnes: 1, table: 12 },
+  { nom: "Leonie", personnes: 1, table: 12 },
+  { nom: "Merveille", personnes: 1, table: 12 },
+  { nom: "Gloria", personnes: 1, table: 12 },
+  { nom: "Eliane G", personnes: 1, table: 12 },
+  { nom: "Grace G", personnes: 1, table: 12 },
+  { nom: "Debora K", personnes: 1, table: 12 },
+  { nom: "Queren G.", personnes: 1, table: 12 },
+  { nom: "Beni / Vladimiro", personnes: 1, table: 12 },
+  { nom: "Dior", personnes: 1, table: 12 },
+
+  { nom: "Couple Paulin nistrine", personnes: 2, table: 13 },
+  { nom: "Couple Hugues Luyeye", personnes: 2, table: 13 },
+  { nom: "couple sImao", personnes: 2, table: 13 },
+  { nom: "Couple yannick", personnes: 2, table: 13 },
+  { nom: "Couple Franck", personnes: 2, table: 13 },
+
+  { nom: "Delphine", personnes: 1, table: 14 },
+  { nom: "Chantal", personnes: 1, table: 14 },
+  { nom: "COUPLE MIRANDA", personnes: 2, table: 14 },
+  { nom: "Couple Brandon", personnes: 2, table: 14 },
+  { nom: "Ginette", personnes: 1, table: 14 },
+  { nom: "Colinne", personnes: 1, table: 14 },
+  { nom: "Jaja", personnes: 1, table: 14 },
+  { nom: "Dienda Becky", personnes: 1, table: 14 },
+
+  { nom: "Maro", personnes: 2, table: 15 },
+  { nom: "Jesuane OLODO", personnes: 1, table: 15 },
+  { nom: "Sabrina URUGLU", personnes: 1, table: 15 },
+  { nom: "Claire OLODO", personnes: 1, table: 15 },
+  { nom: "Ornely KADILE", personnes: 1, table: 15 },
+  { nom: "Flore KADILE", personnes: 1, table: 15 },
+  { nom: "Fabrice", personnes: 1, table: 15 },
+  { nom: "Mbidi Jetou", personnes: 1, table: 15 },
+  { nom: "COUPLE ISRAEL", personnes: 2, table: 15 },
+
+  { nom: "Laura K", personnes: 1, table: 16 },
+  { nom: "Nour", personnes: 1, table: 16 },
+  { nom: "Anne So", personnes: 1, table: 16 },
+  { nom: "Emre", personnes: 1, table: 16 },
+  { nom: "Couple Adel", personnes: 2, table: 16 },
+  { nom: "Arnold", personnes: 1, table: 16 },
+  { nom: "Gloire", personnes: 1, table: 16 },
+  { nom: "Couple koami", personnes: 2, table: 16 },
+
+  { nom: "Couple Zak", personnes: 2, table: 17 },
+  { nom: "Miriame/ Jennifer PAKA", personnes: 2, table: 17 },
+  { nom: "Couple Sharon", personnes: 2, table: 17 },
+  { nom: "Couple B zeku", personnes: 2, table: 17 },
+  { nom: "Couple Olivier", personnes: 2, table: 17 },
+
+  { nom: "Couple Ganda", personnes: 2, table: 18 },
+  { nom: "Couple Muyaya", personnes: 2, table: 18 },
+  { nom: "Couple mvemba", personnes: 2, table: 18 },
+  { nom: "Couple Entse", personnes: 2, table: 18 },
+  { nom: "Couple Ma nathalie", personnes: 2, table: 18 },
+  { nom: "Maman Jeannete Kuya", personnes: 1, table: 18 },
+
+  { nom: "Prisca", personnes: 1, table: 19 },
+  { nom: "Aimé", personnes: 1, table: 19 },
+  { nom: "Arland", personnes: 1, table: 19 },
+  { nom: "Solange", personnes: 1, table: 19 },
+  { nom: "Couple Pathy", personnes: 2, table: 19 },
+  { nom: "Chaida", personnes: 4, table: 19 },
+
+  { nom: "Couple Fondé", personnes: 2, table: 20 },
+  { nom: "Couple Boseki", personnes: 2, table: 20 },
+  { nom: "Couple Tresor Aicha", personnes: 2, table: 20 },
+  { nom: "Laurette", personnes: 1, table: 20 },
+  { nom: "Dieu Merci", personnes: 1, table: 20 },
+  { nom: "Couple Vincent", personnes: 2, table: 20 },
+
+  { nom: "COUPLE IBALA", personnes: 2, table: 21 },
+  { nom: "Gisele", personnes: 1, table: 21 },
+  { nom: "Sandrine", personnes: 1, table: 21 },
+  { nom: "Couple Kalala", personnes: 2, table: 21 },
+  { nom: "Couple Dina", personnes: 2, table: 21 },
+  { nom: "Pierrette", personnes: 1, table: 21 },
+  { nom: "BRIGITTE", personnes: 1, table: 21 },
+
+  { nom: "Couple Chicco - Joelle", personnes: 2, table: 22 },
+  { nom: "Constant", personnes: 2, table: 22 },
+  { nom: "Miss", personnes: 1, table: 22 },
+  { nom: "BISHOP DOUDOU", personnes: 2, table: 22 },
+  { nom: "Couple Omombo", personnes: 2, table: 22 },
+  { nom: "Couple Ngoma", personnes: 2, table: 22 },
+
+  { nom: "Couple Liliana", personnes: 2, table: 23 },
+  { nom: "Nzola", personnes: 1, table: 23 },
+  { nom: "Couple Papy - Mado", personnes: 2, table: 23 },
+  { nom: "Couple Mambo", personnes: 2, table: 23 },
+  { nom: "Couple Georges", personnes: 2, table: 23 },
+  { nom: "Ma Jeanette", personnes: 2, table: 23 },
+
+  { nom: "Couple Madi", personnes: 2, table: 24 },
+  { nom: "Couple Justin", personnes: 2, table: 24 },
+  { nom: "Couple Langa", personnes: 2, table: 24 },
+  { nom: "Couple Lemba", personnes: 2, table: 24 },
+  { nom: "Couple Samy", personnes: 2, table: 24 },
+
+  { nom: "Maman Frida + Kurt", personnes: 2, table: 25 },
+  { nom: "Magguy Stone", personnes: 1, table: 25 },
+  { nom: "couple Magaka", personnes: 2, table: 25 },
+  { nom: "Ivy Matondo", personnes: 1, table: 25 },
+  { nom: "Couple Lena", personnes: 2, table: 25 },
+  { nom: "Jolene", personnes: 1, table: 25 },
+  { nom: "Papa Quentin", personnes: 1, table: 25 },
+
+  { nom: "Ghilhermina Sebastiao", personnes: 1, table: 26 },
+  { nom: "Couple Hordilon", personnes: 2, table: 26 },
+  { nom: "Couple Clotilde", personnes: 2, table: 26 },
+  { nom: "Couple Lisa", personnes: 2, table: 26 },
+  { nom: "Shanna", personnes: 1, table: 26 },
+  { nom: "Lili", personnes: 1, table: 26 },
+  { nom: "Rosy", personnes: 1, table: 26 },
+
+  { nom: "Couple Ornella", personnes: 2, table: 27 },
+  { nom: "Couple De Jesus", personnes: 2, table: 27 },
+  { nom: "Couple Anais", personnes: 2, table: 27 },
+  { nom: "Couple francis", personnes: 2, table: 27 },
+  { nom: "Esther", personnes: 1, table: 27 },
+  { nom: "Whitney", personnes: 1, table: 27 },
+
+  { nom: "Couple Melissa", personnes: 2, table: 28 },
+  { nom: "Toni", personnes: 1, table: 28 },
+  { nom: "Tania", personnes: 1, table: 28 },
+  { nom: "Fayad", personnes: 1, table: 28 },
+  { nom: "Dan", personnes: 1, table: 28 },
+  { nom: "Anis", personnes: 2, table: 28 },
+  { nom: "Couple DMCEE", personnes: 2, table: 28 },
+
+  { nom: "Couple Michée", personnes: 2, table: 29 },
+  { nom: "Couple Josué - Hatty", personnes: 2, table: 29 },
+  { nom: "Couple Jotta", personnes: 2, table: 29 },
+  { nom: "Olivier", personnes: 2, table: 29 },
+  { nom: "Marly", personnes: 2, table: 29 },
+  { nom: "Othniel", personnes: 1, table: 29 },
+
+  { nom: "COUPLE Mignon", personnes: 2, table: 30 },
+  { nom: "Rachel", personnes: 1, table: 30 },
+  { nom: "Noémie", personnes: 1, table: 30 },
+  { nom: "Jadi", personnes: 1, table: 30 },
+  { nom: "Gemy", personnes: 1, table: 30 },
+  { nom: "Couple Gédéon - Chuva", personnes: 2, table: 30 },
+  { nom: "Couple Henoch - Sephy", personnes: 2, table: 30 },
+  { nom: "Rachel sumbu", personnes: 1, table: 30 },
+
+  { nom: "Couple Ndudi", personnes: 2, table: 31 },
+  { nom: "Couple Goding", personnes: 2, table: 31 },
+  { nom: "Couple Willy", personnes: 2, table: 31 },
+  { nom: "Couple Serge", personnes: 2, table: 31 },
+  { nom: "Couple Lydie", personnes: 2, table: 31 },
+
+  { nom: "Yolande", personnes: 1, table: 32 },
+  { nom: "Taty", personnes: 1, table: 32 },
+  { nom: "Couple Joelle", personnes: 2, table: 32 },
+  { nom: "Couple Tipaty", personnes: 2, table: 32 },
+  { nom: "Fiston", personnes: 1, table: 32 },
+  { nom: "Djino DJ", personnes: 1, table: 32 },
+  { nom: "Pedro Faz tudo", personnes: 2, table: 32 },
+  { nom: "florance", personnes: 1, table: 32 },
+
+  { nom: "Couple Philippe", personnes: 2, table: 33 },
+  { nom: "Couple Adele Patou", personnes: 2, table: 33 },
+  { nom: "Couple Clara", personnes: 2, table: 33 },
+  { nom: "Couple Zeku dieu", personnes: 2, table: 33 },
+  { nom: "Couple Orlove", personnes: 2, table: 33 },
+  { nom: "henry tuluka", personnes: 2, table: 33 },
+
+  { nom: "Couple Jean - Sylvie", personnes: 2, table: 34 },
+  { nom: "Couple Santos", personnes: 2, table: 34 },
+  { nom: "Couple Pedro", personnes: 2, table: 34 },
+  { nom: "Couple Samy", personnes: 2, table: 34 },
+  { nom: "Couple Pascal", personnes: 2, table: 34 },
+
+  { nom: "Couple MARIANO", personnes: 2, table: 35 },
+  { nom: "Couple Dubert", personnes: 2, table: 35 },
+  { nom: "Couple Don", personnes: 2, table: 35 },
+  { nom: "Couple Wetshi", personnes: 2, table: 35 },
+  { nom: "Couple JB Bamenga", personnes: 2, table: 35 },
+
+  { nom: "Couple Daniel - Clarisse", personnes: 2, table: 36 },
+  { nom: "Couple Sara Miezi", personnes: 2, table: 36 },
+  { nom: "couple David", personnes: 2, table: 36 },
+  { nom: "couple Louzy", personnes: 2, table: 36 },
+  { nom: "Couple Tshimanga", personnes: 2, table: 36 },
+
+  { nom: "Couple Lionel", personnes: 2, table: 37 },
+  { nom: "Casy", personnes: 1, table: 37 },
+  { nom: "Blandine", personnes: 1, table: 37 },
+  { nom: "Couple Bijoux", personnes: 2, table: 37 },
+  { nom: "Couple Doudou", personnes: 2, table: 37 },
+  { nom: "Pst Zachari", personnes: 1, table: 37 },
+  { nom: "Djino Serge", personnes: 1, table: 37 },
+  { nom: "Paluku", personnes: 1, table: 37 },
+
+  { nom: "Couple Richard", personnes: 2, table: 38 },
+  { nom: "Couple SOBA", personnes: 2, table: 38 },
+  { nom: "Couple de Bundes", personnes: 2, table: 38 },
+  { nom: "Rolly", personnes: 1, table: 38 },
+  { nom: "Landu", personnes: 1, table: 38 },
+  { nom: "Giscard", personnes: 1, table: 38 },
+  { nom: "Boleme", personnes: 1, table: 38 },
+
+  { nom: "Couple Makaya", personnes: 2, table: 39 },
+  { nom: "Couple Freddy", personnes: 2, table: 39 },
+  { nom: "Couple David", personnes: 2, table: 39 },
+  { nom: "Couple Bonheur", personnes: 2, table: 39 },
+  { nom: "maya", personnes: 1, table: 39 },
+  { nom: "Lyly N", personnes: 1, table: 39 },
+
+  { nom: "Couple Pst Jacques", personnes: 2, table: 40 },
+  { nom: "pasteur Gaby", personnes: 2, table: 40 },
+  { nom: "Couple Guy SAMUEL", personnes: 2, table: 40 },
+  { nom: "Pst Cherry", personnes: 2, table: 40 },
+  { nom: "Couple Paulo", personnes: 2, table: 40 },
+
+  { nom: "Couple Jordan", personnes: 2, table: 41 },
+  { nom: "Couple Rachidi", personnes: 2, table: 41 },
+  { nom: "Couple Glodi", personnes: 2, table: 41 },
+  { nom: "Couple Gloire", personnes: 2, table: 41 },
+  { nom: "mbyia terrance", personnes: 2, table: 41 },
+  { nom: "RUFUS MAMPUYA", personnes: 1, table: 41 },
+
+  { nom: "Couple Cedric", personnes: 2, table: 42 },
+  { nom: "fortini", personnes: 1, table: 42 },
+  { nom: "helder mamengi", personnes: 1, table: 42 },
+  { nom: "yves masola", personnes: 1, table: 42 },
+  { nom: "Christina", personnes: 1, table: 42 },
+  { nom: "Jiga", personnes: 1, table: 42 },
+  { nom: "Couple Louison", personnes: 2, table: 42 },
+  { nom: "Blandine", personnes: 1, table: 42 },
+
+  { nom: "Esther", personnes: 1, table: 44 },
+  { nom: "Honette", personnes: 1, table: 44 },
+  { nom: "sarah", personnes: 1, table: 44 },
+  { nom: "liza", personnes: 2, table: 44 },
+  { nom: "justine", personnes: 1, table: 44 },
+  { nom: "Emilia", personnes: 1, table: 44 },
+  { nom: "Divin", personnes: 1, table: 44 },
+  { nom: "messi", personnes: 1, table: 44 },
+  { nom: "Faveur", personnes: 1, table: 44 },
+  { nom: "Jogguy", personnes: 1, table: 44 },
+
+  { nom: "Brandon", personnes: 1, table: 47 },
+  { nom: "Chris", personnes: 1, table: 47 },
+  { nom: "Andy Mambuku", personnes: 1, table: 47 },
+  { nom: "Almeida", personnes: 1, table: 47 },
+  { nom: "Ruben", personnes: 1, table: 47 },
+  { nom: "Couple Chris - Calista", personnes: 2, table: 47 },
+  { nom: "Mariam buana", personnes: 2, table: 47 },
+  { nom: "Blanchard Mulolo", personnes: 1, table: 47 }
 ];
 
 /* ================= NOTES / CHANGEMENTS ================= */
@@ -265,7 +527,7 @@ let NOTES_ACCUEIL = JSON.parse(
 );
 
 /* ================= STATE ================= */
-let invites = INVITES;
+let invites = [];
 let selectedInvite = null;
 let scanned = JSON.parse(localStorage.getItem("scannedList") || "[]");
 let qr = null;
@@ -281,9 +543,69 @@ const normalize = s =>
     .replace(/\s+/g, " ")
     .trim();
 
-const getInviteKey = (nom, table) => `${normalize(nom)}__${Number(table) || 0}`;
+function getInviteKey(nom, table) {
+  return `${normalize(nom)}__${Number(table) || 0}`;
+}
+
+function areProbablySameInvite(a, b) {
+  const na = normalize(a);
+  const nb = normalize(b);
+
+  if (na === nb) return true;
+
+  const naNoCouple = na.replace(/^couple\s+/, "");
+  const nbNoCouple = nb.replace(/^couple\s+/, "");
+
+  return naNoCouple === nbNoCouple;
+}
+
+function buildInvitesWithChanges() {
+  const finalList = INVITES.map(inv => ({ ...inv }));
+
+  CHANGEMENTS_TABLES.forEach(ch => {
+    const idx = finalList.findIndex(inv => areProbablySameInvite(inv.nom, ch.nom));
+    if (idx >= 0) {
+      finalList[idx] = {
+        nom: finalList[idx].nom,
+        personnes: Number(ch.personnes) || finalList[idx].personnes,
+        table: Number(ch.table) || finalList[idx].table
+      };
+    } else {
+      finalList.push({
+        nom: ch.nom,
+        personnes: Number(ch.personnes) || 0,
+        table: Number(ch.table) || 0
+      });
+    }
+  });
+
+  return finalList;
+}
+
+function findInviteByName(nom) {
+  return invites.find(inv => areProbablySameInvite(inv.nom, nom));
+}
+
+function resolveInviteData(nom, personnes, table) {
+  const found = findInviteByName(nom);
+
+  if (found) {
+    return {
+      nom: found.nom,
+      personnes: Number(found.personnes) || 0,
+      table: Number(found.table) || 0
+    };
+  }
+
+  return {
+    nom: nom,
+    personnes: Number(personnes) || 0,
+    table: Number(table) || 0
+  };
+}
 
 /* ================= INIT ================= */
+invites = buildInvitesWithChanges();
 renderScannedList();
 updateCounter();
 renderChangements();
@@ -483,20 +805,15 @@ function validateManual() {
 
 /* ================= LOGIQUE CENTRALE ================= */
 function processEntry(nom, personnes, table, source) {
-  const key = getInviteKey(nom, table);
+  const resolved = resolveInviteData(nom, personnes, table);
+  const key = getInviteKey(resolved.nom, resolved.table);
 
   if (scanned.find(s => getInviteKey(s.nom, s.table) === key)) {
     showStatus("Déjà entré", "already");
     return;
   }
 
-  const entry = {
-    nom,
-    personnes: Number(personnes) || 0,
-    table: Number(table) || 0
-  };
-
-  scanned.push(entry);
+  scanned.push(resolved);
   localStorage.setItem("scannedList", JSON.stringify(scanned));
 
   showStatus(`Entrée validée (${source})`, "ok");
@@ -504,13 +821,13 @@ function processEntry(nom, personnes, table, source) {
   updateCounter();
 
   document.getElementById("info").innerHTML = `
-    <p><strong>Nom :</strong> ${entry.nom}</p>
-    <p><strong>Personnes :</strong> ${entry.personnes}</p>
-    <p><strong>Table :</strong> ${entry.table}</p>
+    <p><strong>Nom :</strong> ${resolved.nom}</p>
+    <p><strong>Personnes :</strong> ${resolved.personnes}</p>
+    <p><strong>Table :</strong> ${resolved.table}</p>
   `;
 
-  window.currentDisplayedInviteName = entry.nom;
-  showAccueilNote(entry.nom);
+  window.currentDisplayedInviteName = resolved.nom;
+  showAccueilNote(resolved.nom);
 }
 
 /* ================= UI ================= */
